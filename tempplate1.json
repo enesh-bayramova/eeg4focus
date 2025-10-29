@@ -1,0 +1,110 @@
+{
+  "name": "EEG Focus Alert (Basic)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "focus",
+        "options": {}
+      },
+      "id": "Webhook_Trigger",
+      "name": "Receive EEG Data",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "webhookDescription": "Receives EEG data with attentionScore"
+    },
+    {
+      "parameters": {
+        "functionCode": "const data = items[0].json;\nconst threshold = 0.4;\n\n// Проверяем уровень внимания\nconst alert = data.attentionScore < threshold;\n\nreturn [{ json: {\n  userId: data.userId || 'unknown',\n  attentionScore: data.attentionScore,\n  alert,\n  timestamp: new Date().toISOString()\n}}];"
+      },
+      "id": "Function_Check",
+      "name": "Check Attention Level",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json[\"alert\"]}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "If_Alert",
+      "name": "Attention Low?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "console.log('⚠️ Focus dropped!', items[0].json);\nreturn items;"
+      },
+      "id": "Log_Alert",
+      "name": "Log Alert",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "console.log('✅ Focus OK', items[0].json);\nreturn items;"
+      },
+      "id": "Log_Normal",
+      "name": "Log Normal",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 400]
+    }
+  ],
+  "connections": {
+    "Receive EEG Data": {
+      "main": [
+        [
+          {
+            "node": "Check Attention Level",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Attention Level": {
+      "main": [
+        [
+          {
+            "node": "Attention Low?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attention Low?": {
+      "main": [
+        [
+          {
+            "node": "Log Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Normal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "triggerCount": 1
+}
