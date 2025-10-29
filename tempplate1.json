@@ -15,7 +15,7 @@
     },
     {
       "parameters": {
-        "functionCode": "const data = items[0].json;\nconst threshold = 0.4;\n\n// Проверяем уровень внимания\nconst alert = data.attentionScore < threshold;\n\nreturn [{ json: {\n  userId: data.userId || 'unknown',\n  attentionScore: data.attentionScore,\n  alert,\n  timestamp: new Date().toISOString()\n}}];"
+        "functionCode": "const data = items[0].json;\nconst threshold = 0.4;\n\n// Checking attention level\nconst alert = data.attentionScore < threshold;\n\nreturn [{ json: {\n  userId: data.userId || 'unknown',\n  attentionScore: data.attentionScore,\n  alert,\n  timestamp: new Date().toISOString()\n}}];"
       },
       "id": "Function_Check",
       "name": "Check Attention Level",
