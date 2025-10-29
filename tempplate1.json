@@ -1,21 +1,30 @@
 {
-  "name": "EEG Focus Alert (Basic)",
+  "name": "EEG Focus Simulator",
   "nodes": [
     {
       "parameters": {
-        "path": "focus",
-        "options": {}
+        "interval": 10,
+        "unit": "seconds"
       },
-      "id": "Webhook_Trigger",
-      "name": "Receive EEG Data",
-      "type": "n8n-nodes-base.webhook",
+      "id": "Cron_Simulate",
+      "name": "Cron Trigger",
+      "type": "n8n-nodes-base.cron",
       "typeVersion": 1,
-      "position": [200, 300],
-      "webhookDescription": "Receives EEG data with attentionScore"
+      "position": [100, 300]
     },
     {
       "parameters": {
-        "functionCode": "const data = items[0].json;\nconst threshold = 0.4;\n\n// Проверяем уровень внимания\nconst alert = data.attentionScore < threshold;\n\nreturn [{ json: {\n  userId: data.userId || 'unknown',\n  attentionScore: data.attentionScore,\n  alert,\n  timestamp: new Date().toISOString()\n}}];"
+        "functionCode": "// Generate random EEG data with attentionScore between 0 and 1\nreturn [{ json: {\n  userId: 'simulatedUser',\n  attentionScore: Math.random(),\n  timestamp: new Date().toISOString()\n}}];"
+      },
+      "id": "Function_Simulate",
+      "name": "Generate Random EEG Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract incoming data and check if attention level is below threshold\nconst data = items[0].json;\nconst threshold = 0.4;\n\nconst alert = data.attentionScore < threshold;\n\nreturn [{ json: {\n  userId: data.userId || 'unknown',\n  attentionScore: data.attentionScore,\n  alert,\n  timestamp: data.timestamp\n}}];"
       },
       "id": "Function_Check",
       "name": "Check Attention Level",
@@ -42,7 +51,7 @@
     },
     {
       "parameters": {
-        "functionCode": "console.log('⚠️ Focus dropped!', items[0].json);\nreturn items;"
+        "functionCode": "// Log an alert if focus dropped\nconsole.log('⚠️ Focus dropped!', items[0].json);\nreturn items;"
       },
       "id": "Log_Alert",
       "name": "Log Alert",
@@ -52,7 +61,7 @@
     },
     {
       "parameters": {
-        "functionCode": "console.log('✅ Focus OK', items[0].json);\nreturn items;"
+        "functionCode": "// Log normal focus state\nconsole.log('✅ Focus OK', items[0].json);\nreturn items;"
       },
       "id": "Log_Normal",
       "name": "Log Normal",
@@ -62,47 +71,58 @@
     }
   ],
   "connections": {
-    "Receive EEG Data": {
+    "Cron_Simulate": {
       "main": [
         [
           {
-            "node": "Check Attention Level",
+            "node": "Function_Simulate",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Check Attention Level": {
+    "Function_Simulate": {
       "main": [
         [
           {
-            "node": "Attention Low?",
+            "node": "Function_Check",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Attention Low?": {
+    "Function_Check": {
       "main": [
         [
           {
-            "node": "Log Alert",
+            "node": "If_Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If_Alert": {
+      "main": [
+        [
+          {
+            "node": "Log_Alert",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Log Normal",
+            "node": "Log_Normal",
             "type": "main",
             "index": 0
           }
         ]
       ]
     }
-  },
+  ],
   "settings": {
     "executionOrder": "v1"
   },
