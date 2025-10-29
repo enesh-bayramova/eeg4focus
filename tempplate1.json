@@ -14,7 +14,7 @@
     },
     {
       "parameters": {
-        "functionCode": "// Generate random EEG data with attentionScore between 0 and 1\nreturn [{ json: {\n  userId: 'simulatedUser',\n  attentionScore: Math.random(),\n  timestamp: new Date().toISOString()\n}}];"
+        "functionCode": "return [{ json: { userId: 'simulatedUser', attentionScore: Math.random(), timestamp: new Date().toISOString() }}];"
       },
       "id": "Function_Simulate",
       "name": "Generate Random EEG Data",
@@ -24,7 +24,7 @@
     },
     {
       "parameters": {
-        "functionCode": "// Extract incoming data and check if attention level is below threshold\nconst data = items[0].json;\nconst threshold = 0.4;\n\nconst alert = data.attentionScore < threshold;\n\nreturn [{ json: {\n  userId: data.userId || 'unknown',\n  attentionScore: data.attentionScore,\n  alert,\n  timestamp: data.timestamp\n}}];"
+        "functionCode": "const data = items[0].json; const threshold = 0.4; const alert = data.attentionScore < threshold; return [{ json: { userId: data.userId || 'unknown', attentionScore: data.attentionScore, alert, timestamp: data.timestamp }}];"
       },
       "id": "Function_Check",
       "name": "Check Attention Level",
@@ -51,7 +51,7 @@
     },
     {
       "parameters": {
-        "functionCode": "// Log an alert if focus dropped\nconsole.log('⚠️ Focus dropped!', items[0].json);\nreturn items;"
+        "functionCode": "console.log('⚠️ Focus dropped!', items[0].json); return items;"
       },
       "id": "Log_Alert",
       "name": "Log Alert",
@@ -61,7 +61,7 @@
     },
     {
       "parameters": {
-        "functionCode": "// Log normal focus state\nconsole.log('✅ Focus OK', items[0].json);\nreturn items;"
+        "functionCode": "console.log('✅ Focus OK', items[0].json); return items;"
       },
       "id": "Log_Normal",
       "name": "Log Normal",
